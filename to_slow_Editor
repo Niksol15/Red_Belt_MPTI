@@ -1,0 +1,41 @@
+#include <string>
+
+using namespace std;
+
+class Editor {
+public:
+    Editor() = default;
+    void Left(){
+        if(cursor_pos != 0){
+            --cursor_pos;
+        }
+    }
+    void Right(){
+        if(cursor_pos != text.size()){
+            ++cursor_pos;
+        }
+    }
+    void Insert(char token){
+        text.insert(cursor_pos, 1, token);
+        ++cursor_pos;
+    }
+    void Cut(size_t tokens = 1){
+        buffer = text.substr(cursor_pos, tokens);
+        text.erase(cursor_pos, tokens);
+    }
+    void Copy(size_t tokens = 1){
+        buffer = text.substr(cursor_pos, tokens);
+    }
+    void Paste(){
+        text.insert(cursor_pos, buffer);
+        cursor_pos += buffer.size();
+    }
+    [[nodiscard]] string GetText() const{
+        return text;
+    }
+
+private:
+    size_t cursor_pos = 0;
+    string buffer;
+    string text;
+};
