@@ -1,0 +1,41 @@
+#include <future>
+#include <deque>
+using namespace std;
+
+template <typename K, typename V>
+class ConcurrentMap {
+public:
+    static_assert(is_integral_v<K>, "ConcurrentMap supports only integer keys");
+
+    struct Access {
+        lock_guard<mutex> guard;
+        V& ref_to_value;
+    };
+
+    explicit ConcurrentMap(size_t bucket_count): BUCKET_COUNT(bucket_count){
+        maps.resize(BUCKET_COUNT);
+    }
+
+    Access operator[](const K& key){
+        size_t map_key = key % BUCKET_COUNT;
+        auto& curr_map = maps[map_key];
+        return Access{lock_guard(curr_map._bucket_mutex), curr_map._bucket_map[key]};
+    }
+
+    map<K, V> BuildOrdinaryMap(){
+        std::map<K, V> result;
+        for (const auto& map_ : maps) {
+            for (const auto& [key, value] : map_._bucket_map) {
+                result[key] = operator[](key).ref_to_value;
+            }
+        }
+        return result;
+    }
+private:
+    const size_t BUCKET_COUNT;
+    struct Bucket{
+        map<K, V> _bucket_map;
+        mutex _bucket_mutex;
+    };
+    deque<Bucket> maps;
+};
