@@ -12,8 +12,7 @@ public:
         V& ref_to_value;
     };
 
-    explicit ConcurrentMap(size_t bucket_count): BUCKET_COUNT(bucket_count){
-        maps.resize(BUCKET_COUNT);
+    explicit ConcurrentMap(size_t bucket_count): BUCKET_COUNT(bucket_count), maps(BUCKET_COUNT){
     }
 
     Access operator[](const K& key){
